@@ -10,4 +10,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	}
 });
 
-chrome.tabs;
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+	console.log('completed');
+	if (changeInfo === 'complete') {
+		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+			chrome.tabs.sendMessage(tabs[0].id, { action: 'Text Summarized' }, () => {
+				console.log('nice');
+			});
+		});
+	}
+});

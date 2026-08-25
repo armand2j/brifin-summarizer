@@ -24,7 +24,6 @@ function waitForElement(selector) {
 	});
 }
 
-
 chrome.runtime.onMessage.addListener((request, sender) => {
 	if (request.action === 'Text Summarized') {
 		console.log('text was summarized');
