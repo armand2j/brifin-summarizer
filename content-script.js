@@ -26,15 +26,19 @@ function waitForElement(selector) {
 
 chrome.runtime.onMessage.addListener((request, sender) => {
 	if (request.action === 'pageLoaded') {
-		console.log('page loading complete...');
+		console.log('page loaded.');
 		const urlParts = location.hash.split('/');
 
 		if (urlParts.length <= 1) {
 			console.log("This isn't an email...");
 			return;
 		}
-		if (urlParts[1].toLowerCase().startsWith('fmfc')) {
+		const emailId = urlParts.at(-1).toLowerCase();
+		const characterAmount = 32;
+		if (emailId.length === characterAmount) {
 			console.log("You're viewing an email!");
 		}
 	}
 });
+
+chrome.runtime.change;
