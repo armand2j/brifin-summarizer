@@ -10,18 +10,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	}
 });
 
-let canComplete = false;
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-	console.log(canComplete);
-	if (changeInfo.status == 'complete' && canComplete) {
-		canComplete = false;
+	if (changeInfo.status === 'complete') {
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 			chrome.tabs.sendMessage(tabs[0].id, { action: 'pageLoaded' });
 			console.log(tabs[0].id);
 			return;
 		});
-	}
-	if (changeInfo.status == 'loading') {
-		canComplete = true;
 	}
 });

@@ -24,8 +24,13 @@ function waitForElement(selector) {
 	});
 }
 
+// let pageAlreadyLoaded = false;
 chrome.runtime.onMessage.addListener((request, sender) => {
+	// if (pageAlreadyLoaded) {
+	// 	return;
+	// }
 	if (request.action === 'pageLoaded') {
+		// pageAlreadyLoaded = true;
 		console.log('page loaded.');
 		const urlParts = location.hash.split('/');
 
@@ -37,8 +42,16 @@ chrome.runtime.onMessage.addListener((request, sender) => {
 		const characterAmount = 32;
 		if (emailId.length === characterAmount) {
 			console.log("You're viewing an email!");
+			const summarizeBtnId = 'summarize-btn';
+			const summarizeBtnContainerSelector = `td:has(> h3 span[email="elbrifin@elbrifin.com"])`;
+			waitForElement(summarizeBtnContainerSelector).then((container) => {
+				if (document.querySelector('#' + summarizeBtnId)) return;
+				const summarizeBtn = document.createElement('button');
+				summarizeBtn.textContent = 'Summarize';
+				summarizeBtn.id = summarizeBtnId;
+				summarizeBtn.style = style();
+				container.appendChild(summarizeBtn);
+			});
 		}
 	}
 });
-
-chrome.runtime.change;
