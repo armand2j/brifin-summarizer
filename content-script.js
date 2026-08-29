@@ -98,6 +98,7 @@ chrome.runtime.onMessage.addListener((request, sender) => {
 				summarizeBtn.addEventListener('click', (ev) => {
 					console.log(document.querySelector('.a3s').innerText);
 					summarizeBtn.setAttribute('disabled', '');
+					addSummaryContainer();
 				});
 
 				container.appendChild(styleElm);
@@ -106,3 +107,54 @@ chrome.runtime.onMessage.addListener((request, sender) => {
 		}
 	}
 });
+
+function addSummaryContainer() {
+	waitForElement('tbody:has(p)').then((tbody) => {
+		console.log(tbody);
+		const row = document.createElement('tr');
+		row.classList.add('summary-row');
+		const summaryContainer = document.createElement('div');
+		summaryContainer.classList.add('summary-container');
+		const styleElm = document.createElement('style');
+		styleElm.textContent = `
+			:root {
+				font-family: inherit;
+			}
+
+			.summary-container {
+				--bg-color: rgb(211 227 253);
+				font-size: 0.9rem;
+				min-height: 100px;
+				text-align: center;
+				margin-right: auto;
+				margin-left: auto;
+				width: 50%;
+				background-color: var(--bg-color);
+				border-radius: 16px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+
+			.summary-row {
+				width: 100%;
+			}
+			
+			.loading {
+				font-style: italic;
+				font-weight: bold;
+				
+			}
+		`;
+
+		const loadingText = document.createElement('span');
+		loadingText.textContent = 'Summarizing...';
+		loadingText.classList.add('loading');
+
+		summaryContainer.appendChild(loadingText);
+		summaryContainer.appendChild(styleElm);
+		row.appendChild(summaryContainer);
+		tbody.insertBefore(row, tbody.firstChild);
+		console.log(row);
+	});
+}
