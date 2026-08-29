@@ -29,6 +29,18 @@ chrome.runtime.onMessage.addListener((request, sender) => {
 	// if (pageAlreadyLoaded) {
 	// 	return;
 	// }
+	if (request.action === 'summary-completed' && request.text) {
+		waitForElement('#loading-text').then((loadingText) => {
+			loadingText.remove();
+		});
+		waitForElement('#summary-container').then((container) => {
+			const summaryParagraph = document.createElement('p');
+			summaryParagraph.textContent = request.text;
+			container.appendChild(summaryParagraph);
+			addCredits(container);
+		});
+	}
+
 	if (request.action === 'pageLoaded') {
 		// pageAlreadyLoaded = true;
 		console.log('page loaded.');
@@ -96,7 +108,8 @@ chrome.runtime.onMessage.addListener((request, sender) => {
 				`;
 
 				summarizeBtn.addEventListener('click', (ev) => {
-					console.log(document.querySelector('.a3s').innerText);
+					textToSummarize = document.querySelector('.a3s').innerText;
+					chrome.runtime.sendMessage({ action: 'generate-summary', text: textToSummarize });
 					summarizeBtn.setAttribute('disabled', '');
 					addSummaryContainer();
 				});
@@ -114,42 +127,44 @@ function addSummaryContainer() {
 		const row = document.createElement('tr');
 		row.classList.add('summary-row');
 		const summaryContainer = document.createElement('div');
-		summaryContainer.classList.add('summary-container');
+		summaryContainer.id = 'summary-container';
 		const styleElm = document.createElement('style');
 		styleElm.textContent = `
 			:root {
 				font-family: inherit;
 			}
 
-			.summary-container {
+			#summary-container {
 				--bg-color: rgb(211 227 253);
 				font-size: 0.9rem;
 				min-height: 100px;
-				text-align: center;
+				text-align: justify;
 				margin-right: auto;
 				margin-left: auto;
-				width: 50%;
+				width: clamp(60%, 640px, 60%);
+				padding: 20px 30px;
 				background-color: var(--bg-color);
 				border-radius: 16px;
 				display: flex;
+				flex-direction: column;
 				justify-content: center;
 				align-items: center;
 			}
 
 			.summary-row {
 				width: 100%;
+				height: 100%;
 			}
 			
-			.loading {
+			#loading-text {
 				font-style: italic;
 				font-weight: bold;
-				
 			}
 		`;
 
 		const loadingText = document.createElement('span');
 		loadingText.textContent = 'Summarizing...';
-		loadingText.classList.add('loading');
+		loadingText.id = 'loading-text';
 
 		summaryContainer.appendChild(loadingText);
 		summaryContainer.appendChild(styleElm);
@@ -157,4 +172,18 @@ function addSummaryContainer() {
 		tbody.insertBefore(row, tbody.firstChild);
 		console.log(row);
 	});
+}
+
+function addCredits(container) {
+	const text = document.createElement('p');
+	text.innerHTML = '<span class="extension-name">Brifin Summarizer</span> by Armando';
+	const styleElm = document.createElement('style');
+	styleElm.textContent = `
+		.extension-name {
+			font-weight: bold;
+			font-style: italic;
+		}
+	`;
+	text.appendChild(styleElm);
+	container.appendChild(text);
 }
