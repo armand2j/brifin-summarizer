@@ -109,11 +109,10 @@ chrome.runtime.onMessage.addListener((request, sender) => {
 
 				summarizeBtn.addEventListener('click', (ev) => {
 					textToSummarize = document.querySelector('.a3s').innerText;
-					chrome.runtime.sendMessage({ action: 'generate-summary', text: textToSummarize });
+					chrome.runtime.sendMessage({ action: 'generate-summary', text: textToSummarize, tabId: request.tabId });
 					summarizeBtn.setAttribute('disabled', '');
 					addSummaryContainer();
 				});
-
 				container.appendChild(styleElm);
 				container.appendChild(summarizeBtn);
 			});
@@ -157,14 +156,14 @@ function addSummaryContainer() {
 			}
 			
 			#loading-text {
-				font-style: italic;
 				font-weight: bold;
 			}
 		`;
 
 		const loadingText = document.createElement('span');
-		loadingText.textContent = 'Summarizing...';
+		loadingText.textContent = 'Summarizing';
 		loadingText.id = 'loading-text';
+		startDotAnimation(loadingText);
 
 		summaryContainer.appendChild(loadingText);
 		summaryContainer.appendChild(styleElm);
@@ -186,4 +185,26 @@ function addCredits(container) {
 	`;
 	text.appendChild(styleElm);
 	container.appendChild(text);
+}
+
+function startDotAnimation(elm) {
+	const className = 'dot-animation';
+	const timeoutDelay = 170;
+	const maxLength = 3;
+	if (!elm) return;
+	if (!elm.querySelector(`.${className}`)) {
+		const span = document.createElement('span');
+		span.classList.add(className);
+		span.textContent = '.';
+		elm.appendChild(span);
+	}
+
+	const timeoutId = setTimeout(() => {
+		const span = elm.querySelector(`.${className}`);
+		if (span.textContent.length >= maxLength) {
+			span.textContent = '';
+		} else span.textContent += '.';
+
+		startDotAnimation(elm);
+	}, timeoutDelay);
 }

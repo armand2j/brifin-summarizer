@@ -29,30 +29,26 @@ async function generateSummary(text) {
 	return summary;
 }
 
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+	if (changeInfo.status === 'complete') {
+		try {
+			chrome.tabs.sendMessage(tabId, { action: 'pageLoaded', tabId: tabId });
+			console.log(tabId);
+		} catch (error) {
+			console.error('error happened. tab is was not found.');
+		}
+	}
+});
+
 chrome.runtime.onMessage.addListener((request, sender) => {
 	if (request.action === 'generate-summary' && request.text) {
 		console.log('message received to generate summary.');
 		generateSummary(request.text).then((summary) => {
-			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-				try {
-					chrome.tabs.sendMessage(tabs[0].id, { action: 'summary-completed', text: summary });
-					console.log(tabs[0].id);
-				} catch (error) {
-					console.error('error happened. tab is undefined');
-				}
-			});
-		});
-	}
-});
-
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-	if (changeInfo.status === 'complete') {
-		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 			try {
-				chrome.tabs.sendMessage(tabs[0].id, { action: 'pageLoaded' });
-				console.log(tabs[0].id);
+				chrome.tabs.sendMessage(request.tabId, { action: 'summary-completed', text: summary });
+				console.log(request.tabId);
 			} catch (error) {
-				console.error('error happened. tab is undefined');
+				console.error('error happened. tab was not found');
 			}
 		});
 	}
